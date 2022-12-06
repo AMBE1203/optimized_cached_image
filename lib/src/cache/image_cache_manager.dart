@@ -77,11 +77,12 @@ mixin OicImageCacheManager on BaseCacheManager {
     }
 
     var image = await _decodeImage(originalFile.file);
-    var shouldResize = maxWidth != null
-        ? image.width > maxWidth
-        : false || maxHeight != null
-            ? image.height > maxHeight
-            : false;
+    var shouldResize = (image.height > 400 && image.width > 400) &&
+        (maxWidth != null
+            ? image.width > maxWidth
+            : false || maxHeight != null
+                ? image.height > maxHeight
+                : false);
 
     if (!shouldResize) return originalFile;
 
