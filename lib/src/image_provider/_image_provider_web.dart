@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 import '_load_async_web.dart';
@@ -64,8 +65,8 @@ class OptimizedCacheImageProvider
   }
 
   @override
-  ImageStreamCompleter load(
-      image_provider.OptimizedCacheImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter load(image_provider.OptimizedCacheImageProvider key,
+      ImageDecoderCallback decode) {
     final chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiImageStreamCompleter(
@@ -95,7 +96,7 @@ class OptimizedCacheImageProvider
   Stream<ui.Codec> _loadAsync(
     OptimizedCacheImageProvider key,
     StreamController<ImageChunkEvent> chunkEvents,
-    DecoderCallback decode,
+    ImageDecoderCallback decode,
   ) {
     switch (_imageRenderMethodForWeb) {
       case ImageRenderMethodForWeb.HttpGet:
@@ -110,7 +111,7 @@ class OptimizedCacheImageProvider
   Stream<ui.Codec> _loadAsyncHttpGet(
     OptimizedCacheImageProvider key,
     StreamController<ImageChunkEvent> chunkEvents,
-    DecoderCallback decode,
+    ImageDecoderCallback decode,
   ) async* {
     assert(key == this);
     try {
@@ -126,7 +127,8 @@ class OptimizedCacheImageProvider
         if (result is FileInfo) {
           var file = result.file;
           var bytes = await file.readAsBytes();
-          var decoded = await decode(bytes);
+          var decoded =
+              await decode(await ImmutableBuffer.fromUint8List(bytes));
           yield decoded;
         }
       }

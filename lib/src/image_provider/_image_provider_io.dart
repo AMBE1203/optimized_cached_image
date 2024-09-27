@@ -1,6 +1,7 @@
 import 'dart:async' show Future, StreamController, scheduleMicrotask;
 import 'dart:ui' as ui show Codec;
 
+import 'package:flutter/services.dart';
 import 'package:optimized_cached_image/src/cache/default_image_cache_manager.dart';
 import 'package:optimized_cached_image/src/cache/image_cache_manager.dart';
 
@@ -68,8 +69,8 @@ class OptimizedCacheImageProvider
   }
 
   @override
-  ImageStreamCompleter load(
-      image_provider.OptimizedCacheImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter load(image_provider.OptimizedCacheImageProvider key,
+      ImageDecoderCallback decode) {
     final chunkEvents = StreamController<ImageChunkEvent>();
     return MultiImageStreamCompleter(
       codec: _loadAsync(key, chunkEvents, decode),
@@ -88,7 +89,7 @@ class OptimizedCacheImageProvider
   Stream<ui.Codec> _loadAsync(
     image_provider.OptimizedCacheImageProvider key,
     StreamController<ImageChunkEvent> chunkEvents,
-    DecoderCallback decode,
+    ImageDecoderCallback decode,
   ) async* {
     assert(key == this);
     try {
@@ -120,7 +121,8 @@ class OptimizedCacheImageProvider
         if (result is FileInfo) {
           var file = result.file;
           var bytes = await file.readAsBytes();
-          var decoded = await decode(bytes);
+          var decoded =
+              await decode(await ImmutableBuffer.fromUint8List(bytes));
           yield decoded;
         }
       }

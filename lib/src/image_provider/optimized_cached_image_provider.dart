@@ -84,5 +84,5 @@ abstract class OptimizedCacheImageProvider
 
   @override
   ImageStreamCompleter load(
-      OptimizedCacheImageProvider key, DecoderCallback decode);
+      OptimizedCacheImageProvider key, ImageDecoderCallback decode);
 }
