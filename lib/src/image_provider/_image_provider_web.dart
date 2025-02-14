@@ -64,8 +64,8 @@ class OptimizedCacheImageProvider
   }
 
   @override
-  ImageStreamCompleter load(
-      image_provider.OptimizedCacheImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter load(image_provider.OptimizedCacheImageProvider key,
+      ui.ImageDecoderCallback decode) {
     final chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiImageStreamCompleter(
@@ -95,7 +95,7 @@ class OptimizedCacheImageProvider
   Stream<ui.Codec> _loadAsync(
     OptimizedCacheImageProvider key,
     StreamController<ImageChunkEvent> chunkEvents,
-    DecoderCallback decode,
+    ui.ImageDecoderCallback decode,
   ) {
     switch (_imageRenderMethodForWeb) {
       case ImageRenderMethodForWeb.HttpGet:
@@ -110,7 +110,7 @@ class OptimizedCacheImageProvider
   Stream<ui.Codec> _loadAsyncHttpGet(
     OptimizedCacheImageProvider key,
     StreamController<ImageChunkEvent> chunkEvents,
-    DecoderCallback decode,
+    ui.ImageDecoderCallback decode,
   ) async* {
     assert(key == this);
     try {
@@ -126,7 +126,8 @@ class OptimizedCacheImageProvider
         if (result is FileInfo) {
           var file = result.file;
           var bytes = await file.readAsBytes();
-          var decoded = await decode(bytes);
+          var buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+          var decoded = await ui.instantiateImageCodecFromBuffer(buffer);
           yield decoded;
         }
       }
@@ -159,7 +160,7 @@ class OptimizedCacheImageProvider
   }
 
   @override
-  int get hashCode => ui.hashValues(url, scale, cacheKey);
+  int get hashCode => Object.hash(url, scale, cacheKey);
 
   @override
   String toString() => '$runtimeType("$url", scale: $scale)';

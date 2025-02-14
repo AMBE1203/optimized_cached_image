@@ -32,7 +32,7 @@ class InfoPage extends StatelessWidget {
                   '\n\n'
                   'Need help with integrating functionalities within your own '
                   'apps? Contact us at anvithv4@gmail.com',
-                  style: Theme.of(context).textTheme.bodyText1,
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 8),

@@ -1,7 +1,7 @@
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-
+import 'dart:ui' as ui;
 import '_image_provider_io.dart'
     if (dart.library.html) '_image_provider_web.dart' as image_provider;
 
@@ -84,5 +84,5 @@ abstract class OptimizedCacheImageProvider
 
   @override
   ImageStreamCompleter load(
-      OptimizedCacheImageProvider key, DecoderCallback decode);
+      OptimizedCacheImageProvider key, ui.ImageDecoderCallback decode);
 }

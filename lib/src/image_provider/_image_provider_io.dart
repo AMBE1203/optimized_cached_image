@@ -1,5 +1,5 @@
 import 'dart:async' show Future, StreamController, scheduleMicrotask;
-import 'dart:ui' as ui show Codec;
+import 'dart:ui' as ui show Codec, ImageDecoderCallback, instantiateImageCodecFromBuffer, ImmutableBuffer;
 
 import 'package:optimized_cached_image/src/cache/default_image_cache_manager.dart';
 import 'package:optimized_cached_image/src/cache/image_cache_manager.dart';
@@ -69,7 +69,7 @@ class OptimizedCacheImageProvider
 
   @override
   ImageStreamCompleter load(
-      image_provider.OptimizedCacheImageProvider key, DecoderCallback decode) {
+      image_provider.OptimizedCacheImageProvider key, ui.ImageDecoderCallback decode) {
     final chunkEvents = StreamController<ImageChunkEvent>();
     return MultiImageStreamCompleter(
       codec: _loadAsync(key, chunkEvents, decode),
@@ -88,7 +88,7 @@ class OptimizedCacheImageProvider
   Stream<ui.Codec> _loadAsync(
     image_provider.OptimizedCacheImageProvider key,
     StreamController<ImageChunkEvent> chunkEvents,
-    DecoderCallback decode,
+    ui.ImageDecoderCallback decode,
   ) async* {
     assert(key == this);
     try {
@@ -120,7 +120,8 @@ class OptimizedCacheImageProvider
         if (result is FileInfo) {
           var file = result.file;
           var bytes = await file.readAsBytes();
-          var decoded = await decode(bytes);
+          var buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+          var decoded = await ui.instantiateImageCodecFromBuffer(buffer);
           yield decoded;
         }
       }
@@ -151,7 +152,7 @@ class OptimizedCacheImageProvider
   }
 
   @override
-  int get hashCode => hashValues(cacheKey ?? url, scale, maxHeight, maxWidth);
+  int get hashCode => Object.hash(cacheKey ?? url, scale, maxHeight, maxWidth);
 
   @override
   String toString() => '$runtimeType("$url", scale: $scale)';
