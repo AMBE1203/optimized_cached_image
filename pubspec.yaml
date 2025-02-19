@@ -16,7 +16,7 @@ dependencies:
   path: ^1.8.0
   pedantic: ^1.11.0
   sprintf: ^6.0.0
-  octo_image: ^1.0.0
+  flutter_blurhash: ^0.8.2
   image: ^3.0.2
   file: ^6.1.0
 dev_dependencies:

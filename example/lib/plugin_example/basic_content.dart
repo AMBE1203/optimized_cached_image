@@ -104,7 +104,7 @@ class BasicContent extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: OptimizedCacheImage(
-        placeholder: (context, url) => const AspectRatio(
+        placeholder: (context, url) => AspectRatio(
           aspectRatio: 1.6,
           child: BlurHash(hash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj'),
         ),
