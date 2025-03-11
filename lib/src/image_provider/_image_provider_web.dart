@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ui' as ui;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -18,17 +19,17 @@ class OptimizedCacheImageProvider
   ///
   /// The arguments [url] and [scale] must not be null.
   const OptimizedCacheImageProvider(
-    this.url, {
-    this.maxHeight,
-    this.maxWidth,
-    this.scale = 1.0,
-    this.errorListener,
-    this.headers,
-    this.cacheManager,
-    this.cacheKey,
-    ImageRenderMethodForWeb? imageRenderMethodForWeb,
-  }) : _imageRenderMethodForWeb =
-            imageRenderMethodForWeb ?? ImageRenderMethodForWeb.HtmlImage;
+      this.url, {
+        this.maxHeight,
+        this.maxWidth,
+        this.scale = 1.0,
+        this.errorListener,
+        this.headers,
+        this.cacheManager,
+        this.cacheKey,
+        ImageRenderMethodForWeb? imageRenderMethodForWeb,
+      }) : _imageRenderMethodForWeb =
+      imageRenderMethodForWeb ?? ImageRenderMethodForWeb.HtmlImage;
 
   @override
   final BaseCacheManager? cacheManager;
@@ -64,14 +65,14 @@ class OptimizedCacheImageProvider
   }
 
   @override
-  ImageStreamCompleter load(image_provider.OptimizedCacheImageProvider key,
-      ui.ImageDecoderCallback decode) {
+  ImageStreamCompleter loadImage(
+      image_provider.OptimizedCacheImageProvider key, ImageDecoderCallback decode) {
     final chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiImageStreamCompleter(
         chunkEvents: chunkEvents.stream,
         codec:
-            _loadAsync(key as OptimizedCacheImageProvider, chunkEvents, decode),
+        _loadAsync(key as OptimizedCacheImageProvider, chunkEvents, decode),
         scale: key.scale,
         informationCollector: _imageStreamInformationCollector(key));
   }
@@ -93,10 +94,10 @@ class OptimizedCacheImageProvider
   }
 
   Stream<ui.Codec> _loadAsync(
-    OptimizedCacheImageProvider key,
-    StreamController<ImageChunkEvent> chunkEvents,
-    ui.ImageDecoderCallback decode,
-  ) {
+      OptimizedCacheImageProvider key,
+      StreamController<ImageChunkEvent> chunkEvents,
+      ImageDecoderCallback decode,
+      ) {
     switch (_imageRenderMethodForWeb) {
       case ImageRenderMethodForWeb.HttpGet:
         return _loadAsyncHttpGet(key, chunkEvents, decode);
@@ -108,10 +109,10 @@ class OptimizedCacheImageProvider
   }
 
   Stream<ui.Codec> _loadAsyncHttpGet(
-    OptimizedCacheImageProvider key,
-    StreamController<ImageChunkEvent> chunkEvents,
-    ui.ImageDecoderCallback decode,
-  ) async* {
+      OptimizedCacheImageProvider key,
+      StreamController<ImageChunkEvent> chunkEvents,
+      ImageDecoderCallback decode,
+      ) async* {
     assert(key == this);
     try {
       var mngr = cacheManager ?? DefaultCacheManager();
@@ -126,8 +127,7 @@ class OptimizedCacheImageProvider
         if (result is FileInfo) {
           var file = result.file;
           var bytes = await file.readAsBytes();
-          var buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
-          var decoded = await ui.instantiateImageCodecFromBuffer(buffer);
+          var decoded = await decode(await ImmutableBuffer.fromUint8List(bytes));
           yield decoded;
         }
       }

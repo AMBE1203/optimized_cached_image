@@ -1,15 +1,15 @@
 import 'dart:async' show Future, StreamController, scheduleMicrotask;
-import 'dart:ui' as ui show Codec, ImageDecoderCallback, instantiateImageCodecFromBuffer, ImmutableBuffer;
+import 'dart:ui' as ui show Codec;
+import 'dart:ui';
 
-import 'package:optimized_cached_image/src/cache/default_image_cache_manager.dart';
-import 'package:optimized_cached_image/src/cache/image_cache_manager.dart';
-
-import 'multi_image_stream_completer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import '../cache/default_image_cache_manager.dart';
+import '../cache/image_cache_manager.dart';
 
 import '../../optimized_cached_image.dart' show ImageRenderMethodForWeb;
+import 'multi_image_stream_completer.dart';
 import 'optimized_cached_image_provider.dart' as image_provider;
 
 /// IO implementation of the CachedNetworkImageProvider; the ImageProvider to
@@ -20,17 +20,17 @@ class OptimizedCacheImageProvider
   /// Creates an ImageProvider which loads an image from the [url], using the [scale].
   /// When the image fails to load [errorListener] is called.
   const OptimizedCacheImageProvider(
-    this.url, {
-    this.maxHeight,
-    this.maxWidth,
-    this.scale = 1.0,
-    this.errorListener,
-    this.headers,
-    this.cacheManager,
-    this.cacheKey,
-    //ignore: avoid_unused_constructor_parameters
-    ImageRenderMethodForWeb? imageRenderMethodForWeb,
-  });
+      this.url, {
+        this.maxHeight,
+        this.maxWidth,
+        this.scale = 1.0,
+        this.errorListener,
+        this.headers,
+        this.cacheManager,
+        this.cacheKey,
+        //ignore: avoid_unused_constructor_parameters
+        ImageRenderMethodForWeb? imageRenderMethodForWeb,
+      });
 
   @override
   final BaseCacheManager? cacheManager;
@@ -68,8 +68,8 @@ class OptimizedCacheImageProvider
   }
 
   @override
-  ImageStreamCompleter load(
-      image_provider.OptimizedCacheImageProvider key, ui.ImageDecoderCallback decode) {
+  ImageStreamCompleter loadImage(
+      image_provider.OptimizedCacheImageProvider key, ImageDecoderCallback decode) {
     final chunkEvents = StreamController<ImageChunkEvent>();
     return MultiImageStreamCompleter(
       codec: _loadAsync(key, chunkEvents, decode),
@@ -86,29 +86,29 @@ class OptimizedCacheImageProvider
   }
 
   Stream<ui.Codec> _loadAsync(
-    image_provider.OptimizedCacheImageProvider key,
-    StreamController<ImageChunkEvent> chunkEvents,
-    ui.ImageDecoderCallback decode,
-  ) async* {
+      image_provider.OptimizedCacheImageProvider key,
+      StreamController<ImageChunkEvent> chunkEvents,
+      ImageDecoderCallback decode,
+      ) async* {
     assert(key == this);
     try {
       var mngr = cacheManager ?? DefaultImageCacheManager();
       assert(
-          mngr is OicImageCacheManager ||
-              (maxWidth == null && maxHeight == null),
-          'To resize the image with a CacheManager the '
+      mngr is OicImageCacheManager ||
+          (maxWidth == null && maxHeight == null),
+      'To resize the image with a CacheManager the '
           'CacheManager needs to be an ImageCacheManager. maxWidth and '
           'maxHeight will be ignored when a normal CacheManager is used.');
 
       var stream = mngr is OicImageCacheManager
           ? mngr.getImageFile(key.url,
-              maxHeight: maxHeight,
-              maxWidth: maxWidth,
-              withProgress: true,
-              headers: headers,
-              key: key.cacheKey)
+          maxHeight: maxHeight,
+          maxWidth: maxWidth,
+          withProgress: true,
+          headers: headers,
+          key: key.cacheKey)
           : mngr.getFileStream(key.url,
-              withProgress: true, headers: headers, key: key.cacheKey);
+          withProgress: true, headers: headers, key: key.cacheKey);
 
       await for (var result in stream) {
         if (result is DownloadProgress) {
@@ -120,8 +120,7 @@ class OptimizedCacheImageProvider
         if (result is FileInfo) {
           var file = result.file;
           var bytes = await file.readAsBytes();
-          var buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
-          var decoded = await ui.instantiateImageCodecFromBuffer(buffer);
+          var decoded = await decode(await ImmutableBuffer.fromUint8List(bytes));
           yield decoded;
         }
       }
